@@ -26,13 +26,14 @@ namespace UnityEngine.UI.Extensions
             this.thickness = (float)Mathf.Clamp(this.thickness, 0, rectTransform.rect.width / 2);
         }
 
-        protected override void OnFillVBO(List<UIVertex> vbo)
+        protected override void OnPopulateMesh(Mesh toFill)
         {
             float outer = -rectTransform.pivot.x * rectTransform.rect.width;
             float inner = -rectTransform.pivot.x * rectTransform.rect.width + this.thickness;
-     
-            vbo.Clear();
-     
+
+            toFill.Clear();
+            var vbo = new VertexHelper(toFill);
+
             Vector2 prevX = Vector2.zero;
             Vector2 prevY = Vector2.zero;
             Vector2 uv0 = new Vector2(0, 0);
@@ -64,7 +65,7 @@ namespace UnityEngine.UI.Extensions
 
                     StepThroughPointsAndFill(outer, inner, ref prevX, ref prevY, out pos0, out pos1, out pos2, out pos3, c, s);
 
-                    SetVbo(vbo,new[] { pos0, pos1, pos2, pos3 }, new[] { uv0, uv1, uv2, uv3 });
+                    vbo.AddUIVertexQuad(SetVbo(new[] { pos0, pos1, pos2, pos3 }, new[] { uv0, uv1, uv2, uv3 }));
                 }
             }
             else
@@ -87,10 +88,15 @@ namespace UnityEngine.UI.Extensions
                     uv2 = new Vector2(pos2.x / tw + 0.5f, pos2.y / th + 0.5f);
                     uv3 = new Vector2(pos3.x / tw + 0.5f, pos3.y / th + 0.5f);
 
-                    SetVbo(vbo, new[] { pos0, pos1, pos2, pos3 }, new[] { uv0, uv1, uv2, uv3 });
+                    vbo.AddUIVertexQuad(SetVbo(new[] { pos0, pos1, pos2, pos3 }, new[] { uv0, uv1, uv2, uv3 }));
 
                     currentAngle += angleByStep;
                 }
+            }
+
+            if (vbo.currentVertCount > 3)
+            {
+                vbo.FillMesh(toFill);
             }
         }
 

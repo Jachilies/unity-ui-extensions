@@ -1,9 +1,8 @@
 # README #
 
 This is an extension project for the new Unity UI system which can be found at: [Unity UI Source](https://bitbucket.org/Unity-Technologies/ui)
-##Update 1.1 released for 5.3 (4.x/5.1 to follow shortly), go check it out.  Will also publish to the asset store soon##
 ###For Unity 5.2.2+ - Use the new 5.3 package!###
-###*Note, due to limited demand, this is the last release we will update the 4.x/5.1 asset package, we'll be focusing on 5.3/5.4 from now on.###
+###*Note, due to limited demand, this is the last release we will update the 4.x/5.1/5.2 asset package, we'll be focusing on 5.3/5.4 from now on.###
 
 -----
 #Intro#
@@ -27,6 +26,8 @@ You can either download / fork this project to access the scripts, or you can al
 
 * [Unity UI Extensions Unity 5.1 Asset](https://bitbucket.org/ddreaper/unity-ui-extensions/downloads/UnityUIExtensions-5.1.unitypackage)
 
+* [Unity UI Extensions Unity 5.2 Asset](https://bitbucket.org/ddreaper/unity-ui-extensions/downloads/UnityUIExtensions-5.2.unitypackage) <- 5.2.0 - 5.2.1 base releases ONLY
+
 * [Unity UI Extensions Unity 5.3 (5.2.1P+) Asset](https://bitbucket.org/ddreaper/unity-ui-extensions/downloads/UnityUIExtensions-5.3.unitypackage) <- use this for 5.2.1P+ releases
 
 > **Note** To retain 5.2 compatibility in the 5.3 package, you will see two warnings related to:
@@ -36,10 +37,6 @@ You can either download / fork this project to access the scripts, or you can al
 > ```
 
 > This has no effect on the package working in 5.4 plus and is only there to maintain backwards compatibility.  We will look to update/remove this in a future release, likely after 5.4.  If you have any concerns, feel free to update your code in your project to add the missing "d".  Unity have ensured it still works as they have mapped the API change for now.
-
-
-##Update 1.0.6##
-* [Unity UI Extensions Unity 5.2 Asset](https://bitbucket.org/ddreaper/unity-ui-extensions/downloads/UnityUIExtensions-5.2.unitypackage) <- 5.2.0 - 5.2.1 base releases ONLY
 
 -----
 #Getting Started#
@@ -52,33 +49,40 @@ To get started with the project, here's a little guide:
 
 ##Update 1.1##
 [![View 1.1 update Video](http://img.youtube.com/vi/JuE0ja5DmV4/0.jpg)](https://www.youtube.com/watch?v=JuE0ja5DmV4 "Update 1.1 for the Unity UI Extensions Project")
-> **Note** for 4.6 / 5.1 / 5.2 base, some features will not be available due to their incompatibility.
+> **Note** for 4.6 / 5.1, some features will not be available due to their incompatibility.
 > Also the Line Renderer remains unchanged in these releases as the updates do not work with the older system
 
 ###New / updated features###
 * New Polygon primitive
 * New UI Vertical Scroller control
 * New Curved layout component
+* New Shining effect
 * New Scroll Conflict Manager
 * Soft Alpha Mask updated in line with SAUI 1.3 release
+* Line Renderer has had a complete overhaul, including full programmatic support, Line list and Bezier line rendering
 * Horizontal and Vertical Scroll Snaps updated to include a Starting page, current page and transition speed parameters. Plus a new GoToPage, Add and Remove page functions
 * Added some script helper functions for LZF compression and Serialization
 * Two utilities to help manage drag thresholds on high PPI systems
 
 ###Fixes###
+* Line Render almost completely re-written with tons of fixes
 * Radial layout updated to avoid 360 overlap (first and last)
 * Scroll Snaps updates to better handle children.
 * Scroll Snaps distribute function updated so it can be called onDirty more efficiently.
 
 ##Upgrade Notes##
 Two scripts were moved and need their originals need deleting post upgrade.  Please remove the following files:
-* Scripts\ImageExtended
-* Scripts\UIImageCrop
+* Scripts\ImageExtended.cs
+* Scripts\UIScrollToSelection.cs
+* Scripts\UIScrollToSelectionXY.cs
+* Scripts\UISelectableExtension.cs
+* Scripts\Effects\UIImageCrop.cs
+
 -------------------
 ##Release History##
 
 For the full release history, follow the below link to the full release notes page.
-### [Release Notes](https://bitbucket.org/ddreaper/unity-ui-extensions/src/d735140cb69a54cc3b974cb813975e8ab734e961/RELEASENOTES.md?fileviewer=file-view-default)###
+### [Release Notes](https://bitbucket.org/ddreaper/unity-ui-extensions/wiki/ReleaseNotes/RELEASENOTES)###
 
 ---
 #Controls and extensions listed in this project:#
@@ -111,6 +115,8 @@ Control | Description | Menu Command | Component Command | Notes | Donate | Cred
 **UILineRenderer** | Graphic control for drawing lines in the UI System | UI / Extensions / Primitives / UI Line Renderer | UI / Extensions / Primitives / UI Line Renderer |[tutorial video](https://www.youtube.com/watch?v=OElcWAZGHi0)|| jack.sydorenko
 **UILineTextureRenderer** | Graphic control for drawing lines in the UI System | UI / Extensions / Primitives / UI Line Texture Renderer | UI / Extensions / Primitives / UI Line Texture Renderer |[tutorial video](https://www.youtube.com/watch?v=OElcWAZGHi0)|| jack.sydorenko, jonbro5556
 **UICircle** | Graphic control for drawing circles in the UI System | UI / Extensions / Primitives / UI Circle | UI / Extensions / Primitives / UI Circle |[tutorial video](https://www.youtube.com/watch?v=2KOnEKAVua0)|| zge
+**DiamondGraph** | Graphic control for drawing a diamond in the UI System | UI / Extensions / Primitives / DiamondGraph | UI / Extensions / Primitives / DiamondGraph |5.2+ only [tutorial video](https://www.youtube.com/watch?v=2KOnEKAVua0)|| koohddang
+**UICornerCut** | Graphic control for drawing a diamond in the UI System | UI/Extensions/Primitives/Cut Corners | UI/Extensions/Primitives/Cut Corners ||| Freezy
 **UIPolygon** | Graphic control for drawing custom polygons in the UI System | UI/Extensions/Primitives/UI Polygon | UI/Extensions/Primitives/UI Polygon ||| CiaccoDavide
 ||||||
 

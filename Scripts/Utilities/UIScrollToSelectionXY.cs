@@ -14,7 +14,6 @@ namespace UnityEngine.UI.Extensions
     [RequireComponent(typeof(ScrollRect))]
     public class UIScrollToSelectionXY : MonoBehaviour
     {
-
         #region Variables
 
         // settings

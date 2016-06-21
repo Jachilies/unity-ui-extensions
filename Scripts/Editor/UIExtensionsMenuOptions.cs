@@ -1103,6 +1103,22 @@ namespace UnityEditor.UI
             Selection.activeGameObject = go;
         }
 
+        [MenuItem("GameObject/UI/Extensions/Primitives/UI Diamond Graph", false)]
+        static public void AddDiamondGraph(MenuCommand menuCommand)
+        {
+            GameObject go = CreateUIElementRoot("UI Diamond Graph", menuCommand, s_ImageGUIElementSize);
+            go.AddComponent<DiamondGraph>();
+            Selection.activeGameObject = go;
+        }
+
+        [MenuItem("GameObject/UI/Extensions/Primitives/UI Cut Corners", false)]
+        static public void AddCutCorners(MenuCommand menuCommand)
+        {
+            GameObject go = CreateUIElementRoot("UI Cut Corners", menuCommand, s_ImageGUIElementSize);
+            go.AddComponent<UICornerCut>();
+            Selection.activeGameObject = go;
+        }
+
         [MenuItem("GameObject/UI/Extensions/Primitives/UI Polygon", false)]
         static public void AddPolygon(MenuCommand menuCommand)
         {
@@ -1753,8 +1769,6 @@ namespace UnityEditor.UI
 
             return buttonRoot;
         }
-
         #endregion
-
     }
 }

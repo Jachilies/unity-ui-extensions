@@ -57,16 +57,18 @@ namespace UnityEngine.UI.Extensions
         }
 
 
-        protected void SetVbo(List<UIVertex> vbo, Vector2[] vertices, Vector2[] uvs)
+        protected UIVertex[] SetVbo(Vector2[] vertices, Vector2[] uvs)
         {
+            UIVertex[] vbo = new UIVertex[4];
             for (int i = 0; i < vertices.Length; i++)
             {
                 var vert = UIVertex.simpleVert;
                 vert.color = color;
                 vert.position = vertices[i];
                 vert.uv0 = uvs[i];
-                vbo.Add(vert);
+                vbo[i] = vert;
             }
+            return vbo;
         }
 
 

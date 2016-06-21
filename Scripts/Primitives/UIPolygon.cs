@@ -46,9 +46,10 @@ namespace UnityEngine.UI.Extensions
             thickness = (float)Mathf.Clamp(thickness, 0, size / 2);
         }
 
-        protected override void OnFillVBO(List<UIVertex> vbo)
+        protected override void OnPopulateMesh(Mesh toFill)
         {
-            vbo.Clear();
+            toFill.Clear();
+            var vbo = new VertexHelper(toFill);
 
             Vector2 prevX = Vector2.zero;
             Vector2 prevY = Vector2.zero;
@@ -94,7 +95,12 @@ namespace UnityEngine.UI.Extensions
                 }
                 prevX = pos1;
                 prevY = pos2;
-                SetVbo(vbo, new[] { pos0, pos1, pos2, pos3 }, new[] { uv0, uv1, uv2, uv3 });
+                vbo.AddUIVertexQuad(SetVbo(new[] { pos0, pos1, pos2, pos3 }, new[] { uv0, uv1, uv2, uv3 }));
+            }
+
+            if (vbo.currentVertCount > 3)
+            {
+                vbo.FillMesh(toFill);
             }
         }
     }
