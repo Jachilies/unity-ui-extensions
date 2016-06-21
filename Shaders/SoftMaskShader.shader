@@ -21,6 +21,7 @@
 		[MaterialToggle]
 		_HardBlend("HardBlend",Float) = 0
 		_FlipAlphaMask("Flip Alpha Mask",int) = 0
+		_NoOuterClip("Outer Clip",int) = 0
 	}
 
 	SubShader
@@ -42,6 +43,8 @@
 			ReadMask[_StencilReadMask]
 			WriteMask[_StencilWriteMask]
 		}
+
+		LOD 0
 
 		Cull Off
 		Lighting Off
@@ -73,17 +76,8 @@
 				float4 worldPosition : TEXCOORD1;
 			};
 
-			inline float UnityGet2DClipping (in float2 position, in float4 clipRect)
-			{
-				float2 inside = step(clipRect.xy, position.xy) * step(position.xy, clipRect.zw);
-				return inside.x * inside.y;
-			}
-
 			fixed4 _Color;
 			fixed4 _TextureSampleAdd;
-
-			bool _UseClipRect;
-			float4 _ClipRect;
 
 			bool _UseAlphaClip;
 
@@ -120,13 +114,14 @@
 			float _CutOff;
 
 			bool _HardBlend = false;
+			bool _NoOuterClip = false;
 
 			fixed4 frag(v2f IN) : SV_Target
 			{
 				half4 color = (tex2D(_MainTex, IN.texcoord) + _TextureSampleAdd) * IN.color;
 
 				// Do we want to clip the image to the Mask Rectangle?
-				if (IN.texcoord.x < _Min.x || IN.texcoord.x > _Max.x || IN.texcoord.y < _Min.y || IN.texcoord.y > _Max.y) // Yes we do
+				if (!_NoOuterClip && (IN.texcoord.x < _Min.x || IN.texcoord.x > _Max.x || IN.texcoord.y < _Min.y || IN.texcoord.y > _Max.y)) // Yes we do
 					color.a = 0;
 				else // It's in the mask rectangle, so apply the alpha of the mask provided.
 				{
@@ -143,11 +138,9 @@
 					if (_FlipAlphaMask == 1)
 						a = 1 - a;
 
-					color.a = a;
+					if(!(IN.texcoord.x < _Min.x || IN.texcoord.x > _Max.x || IN.texcoord.y < _Min.y || IN.texcoord.y > _Max.y))
+						color.a *= a;
 				}
-
-				if (_UseClipRect)
-					color *= UnityGet2DClipping(IN.worldPosition.xy, _ClipRect);
 
 				if (_UseAlphaClip)
 					clip(color.a - 0.001);

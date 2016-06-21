@@ -52,6 +52,8 @@
 		Pass
 		{
 			CGPROGRAM
+// Upgrade NOTE: excluded shader from DX11 and Xbox360; has structs without semantics (struct v2f members _ProgressColor,_Value,_Min,_Max,_Mul,_CutOff)
+#pragma exclude_renderers d3d11 xbox360
 			#pragma vertex vert
 			#pragma fragment frag
 
@@ -71,19 +73,9 @@
 				half2 texcoord  : TEXCOORD0;
 				float4 worldPosition : TEXCOORD1;
 				float4 worldPosition2 : COLOR1;
-			};
-
-			inline float UnityGet2DClipping (in float2 position, in float4 clipRect)
-			{
-				float2 inside = step(clipRect.xy, position.xy) * step(position.xy, clipRect.zw);
-				return inside.x * inside.y;
-			}
 
 			fixed4 _Color;
 			fixed4 _TextureSampleAdd;
-
-			bool _UseClipRect;
-			float4 _ClipRect;
 
 			bool _UseAlphaClip;
 
@@ -91,10 +83,20 @@
 			float _Value;
 			int _LeftToRight;
 
-			bool _HardBlend = false;
+			int _HardBlend = false;
 
 			int _FlipAlphaMask = 0;
 
+			sampler2D _MainTex;
+			sampler2D _AlphaMask;
+
+			float2 _Min;
+			float2 _Max;
+
+			float2 _Mul;
+
+			float _CutOff;
+			int _NoOuterClip;
 			v2f vert(appdata_t IN)
 			{
 				v2f OUT;
@@ -113,19 +115,11 @@
 				return OUT;
 			}
 
-			sampler2D _MainTex;
-			sampler2D _AlphaMask;
 
-			float2 _Min;
-			float2 _Max;
-
-			float2 _Mul;
-
-			float _CutOff;
 
 			fixed4 frag(v2f IN) : SV_Target
 			{
-				half4 color = (tex2D(_MainTex, IN.texcoord) + _TextureSampleAdd) * IN.color;
+				half4 color = (tex2D(_MainTex, IN.texcoord) + _TextureSampleAdd);
 
 				
 				// Do we want to clip the image to the Mask Rectangle?
@@ -134,6 +128,7 @@
 				else // It's in the mask rectangle, so apply the alpha of the mask provided.
 				{
 					float a = tex2D(_AlphaMask, (IN.worldPosition2.xy - _Max) / (_Max-_Min)).a;
+
 					if (a <= _CutOff)
 						a = 0;
 					else
@@ -145,11 +140,9 @@
 					if (_FlipAlphaMask == 1)
 						a = 1 - a;
 
-					color.a = a * color.a;
+					if(!(IN.worldPosition2.x <= _Min.x || IN.worldPosition2.x >= _Max.x || IN.worldPosition2.y <= _Min.y || IN.worldPosition2.y >= _Max.y))
+						color *= a;					
 				}
-
-				if (_UseClipRect)
-					color *= UnityGet2DClipping(IN.worldPosition.xy, _ClipRect);
 
 				if (_UseAlphaClip)
 					clip(color.a - 0.001);
