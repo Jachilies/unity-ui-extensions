@@ -23,6 +23,7 @@ namespace UnityEngine.UI.Extensions
         private readonly List<Image> m_ImagesPool = new List<Image>();
         private readonly List<GameObject> culled_ImagesPool = new List<GameObject>();
         private bool clearImages = false;
+		private Object thisLock = new Object();
 
         /// <summary>
         /// Vertex Index
@@ -189,7 +190,7 @@ namespace UnityEngine.UI.Extensions
         protected override void OnPopulateMesh(VertexHelper toFill)
         {
             var orignText = m_Text;
-            m_Text = m_OutputText;
+            m_Text = GetOutputText();
             base.OnPopulateMesh(toFill);
             m_Text = orignText;
             positions.Clear();
@@ -438,13 +439,15 @@ namespace UnityEngine.UI.Extensions
     
         /* TEMPORARY FIX REMOVE IMAGES FROM POOL DELETE LATER SINCE CANNOT DESTROY */
         void Update() {
-            if (clearImages) {
-                for (int i = 0; i < culled_ImagesPool.Count; i++){
-                    DestroyImmediate(culled_ImagesPool[i]);
-                }
-                culled_ImagesPool.Clear();
-                clearImages = false;
-            }
+			lock (thisLock) {
+				if (clearImages) {
+					for (int i = 0; i < culled_ImagesPool.Count; i++){
+						DestroyImmediate(culled_ImagesPool[i]);
+					}
+					culled_ImagesPool.Clear();
+					clearImages = false;
+				}
+			}
             if( previousText != text)
                 Reset_m_HrefInfos ();
         }
