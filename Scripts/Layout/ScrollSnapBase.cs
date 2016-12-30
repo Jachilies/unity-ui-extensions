@@ -14,6 +14,7 @@ namespace UnityEngine.UI.Extensions
         internal float _scrollStartPosition;
         internal float _childSize;
         private float _childPos;
+        internal Vector2 childAnchorPoint;
         internal ScrollRect _scroll_rect;
         internal Vector3 _lerp_target;
         internal bool _lerp;
@@ -22,46 +23,51 @@ namespace UnityEngine.UI.Extensions
         [Tooltip("The currently active page")]
         internal int _currentPage;
         internal int _previousPage;
-        
+        internal int HalfNoVisibleItems;
+
         [Serializable]
         public class SelectionChangeStartEvent : UnityEvent { }
         [Serializable]
         public class SelectionPageChangedEvent : UnityEvent<int> { }
         [Serializable]
-        public class SelectionChangeEndEvent : UnityEvent { }
+        public class SelectionChangeEndEvent : UnityEvent<int> { }
 
-        [Tooltip("The visible bounds area, controls which items are visible/enabled. *Note Should use a RectMask. (optional)")]
-        public RectTransform MaskArea;
-        [Tooltip("Pixel size to buffer arround Mask Area. (optional)")]
-        public float MaskBuffer = 1;
-        public int HalfNoVisibleItems;
-
-        [Tooltip("The gameobject that contains toggles which suggest pagination. (optional)")]
-        public GameObject Pagination;
-
-        [Tooltip("Button to go to the next page. (optional)")]
-        public GameObject NextButton;
-        [Tooltip("Button to go to the previous page. (optional)")]
-        public GameObject PrevButton;
-        [Tooltip("Transition speed between pages. (optional)")]
-        public float transitionSpeed = 7.5f;
-
-        [Tooltip("Fast Swipe makes swiping page next / previous (optional)")]
-        public Boolean UseFastSwipe = false;
-        [Tooltip("How far swipe has to travel to initiate a page change (optional)")]
-        public int FastSwipeThreshold = 100;
-        [Tooltip("Speed at which the ScrollRect will keep scrolling before slowing down and stopping (optional)")]
-        public int SwipeVelocityThreshold = 200;
-
-        [Tooltip("The screen / page to start the control on")]
+        [Tooltip("The screen / page to start the control on\n*Note, this is a 0 indexed array")]
         [SerializeField]
-        public int StartingScreen = 1;
+        public int StartingScreen = 0;
 
         [Tooltip("The distance between two pages based on page height, by default pages are next to each other")]
         [SerializeField]
         [Range(1, 8)]
         public float PageStep = 1;
 
+        [Tooltip("The gameobject that contains toggles which suggest pagination. (optional)")]
+        public GameObject Pagination;
+
+        [Tooltip("Button to go to the next page. (optional)")]
+        public GameObject NextButton;
+
+        [Tooltip("Button to go to the previous page. (optional)")]
+        public GameObject PrevButton;
+
+        [Tooltip("Transition speed between pages. (optional)")]
+        public float transitionSpeed = 7.5f;
+
+        [Tooltip("Fast Swipe makes swiping page next / previous (optional)")]
+        public Boolean UseFastSwipe = false;
+
+        [Tooltip("How far swipe has to travel to initiate a page change (optional)")]
+        public int FastSwipeThreshold = 100;
+
+        [Tooltip("Speed at which the ScrollRect will keep scrolling before slowing down and stopping (optional)")]
+        public int SwipeVelocityThreshold = 200;
+
+        [Tooltip("The visible bounds area, controls which items are visible/enabled. *Note Should use a RectMask. (optional)")]
+        public RectTransform MaskArea;
+
+        [Tooltip("Pixel size to buffer arround Mask Area. (optional)")]
+        public float MaskBuffer = 1;
+        
         public int CurrentPage
         {
             get
@@ -74,12 +80,19 @@ namespace UnityEngine.UI.Extensions
                 {
                     _previousPage = _currentPage;
                     _currentPage = value;
-                    ChangeBulletsInfo(_currentPage);
                     if(MaskArea) UpdateVisible();
+                    ScreenChange();
+                    ChangeBulletsInfo(_currentPage);
                 }
             }
         }
 
+        [Tooltip("(Experimental)\nBy default, child array objects will use the parent transform\nHowever you can disable this for some interesting effects")]
+        public bool UseParentTransform = true;
+
+        [Tooltip("Scroll Snap children. (optional)\nEither place objects in the scene as children OR\nPrefabs in this array, NOT BOTH")]
+        public GameObject[] ChildObjects;
+        
         [SerializeField]
         private SelectionChangeStartEvent m_OnSelectionChangeStartEvent = new SelectionChangeStartEvent();
         public SelectionChangeStartEvent OnSelectionChangeStartEvent { get { return m_OnSelectionChangeStartEvent; } set { m_OnSelectionChangeStartEvent = value; } }
@@ -92,7 +105,6 @@ namespace UnityEngine.UI.Extensions
         private SelectionChangeEndEvent m_OnSelectionChangeEndEvent = new SelectionChangeEndEvent();
         public SelectionChangeEndEvent OnSelectionChangeEndEvent { get { return m_OnSelectionChangeEndEvent; } set { m_OnSelectionChangeEndEvent = value; } }
 
-        public GameObject[] ChildObjects;
 
         // Use this for initialization
         void Awake()
@@ -102,6 +114,11 @@ namespace UnityEngine.UI.Extensions
             if (_scroll_rect.horizontalScrollbar || _scroll_rect.verticalScrollbar)
             {
                 Debug.LogWarning("Warning, using scrollbars with the Scroll Snap controls is not advised as it causes unpredictable results");
+            }
+
+            if (StartingScreen < 0)
+            {
+                StartingScreen = 0;
             }
 
             _screensContainer = _scroll_rect.content;
@@ -143,10 +160,21 @@ namespace UnityEngine.UI.Extensions
         internal void InitialiseChildObjectsFromArray()
         {
             int childCount = ChildObjects.Length;
+            RectTransform childRect;
+            GameObject child;
             for (int i = 0; i < childCount; i++)
             {
-                ChildObjects[i] = GameObject.Instantiate(ChildObjects[i]);
-                ChildObjects[i].transform.SetParent(_screensContainer.transform);
+                child = GameObject.Instantiate(ChildObjects[i]);
+                //Optionally, use original GO transform when initialising, by default will use parent RectTransform position/rotation
+                if (UseParentTransform)
+                {
+                    childRect = child.GetComponent<RectTransform>();
+                    childRect.rotation = _screensContainer.rotation;
+                    childRect.localScale = _screensContainer.localScale;
+                    childRect.position = _screensContainer.position;
+                }
+                child.transform.SetParent(_screensContainer.transform);
+                ChildObjects[i] = child;
                 if (MaskArea && ChildObjects[i].activeSelf)
                 {
                     ChildObjects[i].SetActive(false);
@@ -168,6 +196,9 @@ namespace UnityEngine.UI.Extensions
 
         internal void UpdateVisible()
         {
+            //If there are no objects in the scene, exit
+            if (ChildObjects == null || ChildObjects.Length < 1 || _screensContainer.childCount < 1) return;
+
             int BottomItem = _currentPage - HalfNoVisibleItems < 0 ? 0 : HalfNoVisibleItems;
             int TopItem = _screensContainer.childCount - _currentPage < HalfNoVisibleItems ? _screensContainer.childCount - _currentPage : HalfNoVisibleItems;
 
@@ -267,31 +298,46 @@ namespace UnityEngine.UI.Extensions
 
         private void OnValidate()
         {
-            var childCount = ChildObjects == null ? _screensContainer.childCount : ChildObjects.Length;
-            if (StartingScreen > childCount - 1)
+            if (_screensContainer || ChildObjects != null)
             {
-                StartingScreen = childCount - 1;
+                var childCount = ChildObjects == null ? _screensContainer.childCount : ChildObjects.Length;
+                if (StartingScreen > childCount - 1)
+                {
+                    StartingScreen = childCount - 1;
+                }
+                if (StartingScreen < 0)
+                {
+                    StartingScreen = 0;
+                }
             }
-            if (StartingScreen < 0)
+            if (MaskBuffer <= 0)
             {
-                StartingScreen = 0;
+                MaskBuffer = 1;
             }
         }
 
+        /// <summary>
+        /// Event fires when the user starts to change the page, either via swipe or button.
+        /// </summary>
         internal void StartScreenChange()
         {
             OnSelectionChangeStartEvent.Invoke();
         }
 
-        internal void ScreenChange(int previousScreen)
+        /// <summary>
+        /// Event fires when the currently viewed page changes, also updates while the scroll is moving
+        /// </summary>
+        internal void ScreenChange()
         {
-
             OnSelectionPageChangedEvent.Invoke(_currentPage);
         }
 
+        /// <summary>
+        /// Event fires when control settles on a page, outputs the new page number
+        /// </summary>
         internal void EndScreenChange()
         {
-            OnSelectionChangeEndEvent.Invoke();
+            OnSelectionChangeEndEvent.Invoke(_currentPage);
         }
 
         #region Interfaces
