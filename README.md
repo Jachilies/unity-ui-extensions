@@ -1,3 +1,12 @@
+# Project is moving #
+
+The project is now being moved to another repo to allow for easier access to the source and docs.
+
+New Project home is now here:
+##https://bitbucket.org/UnityUIExtensions/unity-ui-extensions##
+
+The downloads will remain here but all future source changes will be on the new site. Please bear with us in this transition.
+
 # README #
 
 This is an extension project for the new Unity UI system which can be found at: [Unity UI Source](https://bitbucket.org/Unity-Technologies/ui)
