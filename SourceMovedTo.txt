@@ -1,0 +1,4 @@
+The source for this project has now been migrated to:
+https://bitbucket.org/UnityUIExtensions/unity-ui-extensions
+
+The source control has also been updated to GIT for easier mangagement.
