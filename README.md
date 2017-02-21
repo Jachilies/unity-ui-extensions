@@ -1,4 +1,4 @@
-# Project is moving #
+# Project has moved #
 
 The project has moved to new GIT repo to allow for easier access to the source and docs.
 
