@@ -48,7 +48,7 @@ You can either download / fork this project to access the scripts, or you can al
 
 The asset has been full tested on all current versions of Unity 5 (for versions prior to Unity 5.3, please see the [archive](https://bitbucket.org/UnityUIExtensions/unity-ui-extensions/wiki/Downloads))
 
-* [Unity UI Extensions Asset](https://bitbucket.org/UnityUIExtensions/unity-ui-extensions/downloads/UnityUIExtensions.unitypackage)
+* [Unity UI Extensions Asset](https://bitbucket.org/ddreaper/unity-ui-extensions/downloads/UnityUIExtensions.unitypackage)
 
 To view previous releases, visit the [release archive](https://bitbucket.org/UnityUIExtensions/unity-ui-extensions/wiki/Downloads)
 
